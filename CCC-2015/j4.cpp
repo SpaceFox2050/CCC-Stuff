@@ -2,52 +2,45 @@
 using namespace std;
 
 int main(){
-    int ins;
-    cin >> ins;
-    unordered_map<int, int> friends;
-    unordered_map<int, bool> lock;
-    vector<int> index;
-    //loop ins times to get inputs and calculate wait times
-    for(int n = 0; n < ins; n++){
+    int moves, time = 0, num;
+    cin >> moves;
+    //store friend wait times cant be bigger than 101
+    vector<int> friends (101);
+    //set lock if message has been replied to
+    vector<int> lock (101);
+    //store the time message was received from friend num
+    vector<int> last (101);
+    //loop moves times to get all inputs and calculate wait times
+    for(int n = 0; n < moves; n++){
         char type;
-        int fnum;
-        cin >> type >> fnum;
-        if(type == 'R'){
-            if(friends.count(fnum) == 0) {
-                friends[fnum] = 0;
-                index.push_back(fnum);
+        cin >> type >> num;
+        if(type == 'S'){
+            //add time difference from last message to final[num]; set lock as replied
+            friends[num] += time - last[num];
+            lock[num] = 1;
+        }else if(type == 'R'){
+            //turn off lock and update last time message was sent for friend num
+            lock[num] = -1;
+            last[num] = time;
+        }else{ //meaning type == 'W' (wait)
+            //increase time by num - 2 because wait only occurs after every consecutive pair (2 time)
+            time += num - 2;
+        }
+        time++;
+    }
+    //loop through friends and print out wait time; friend numbers can only range from 1 - 100
+    for(int x = 0; x < 101; x++){
+        //check if lock[x] exists
+        if(lock[x]){
+            //lock is off (has replied to friend message)
+            if(lock[x] > 0){
+                cout << x << " " << friends[x];
+            }else{ //lock is on and message has not been replied to
+                cout << x << " -1";
             }
-            lock[fnum] = false;
-        }else if(type == 'W'){
-            for(int x = 0; x < friends.size(); x++){
-                if(!lock[index[x]]){
-                    friends[index[x]] = friends[index[x]] + fnum;
-                }
-            }
-        }else{
-            lock[fnum] = true;
+            cout << endl;
         }
     }
-    //sort vector index so we can print out wait times in ascending order
-    for(int x = 0; x < index.size(); x++){
-        for(int y = x; y < index.size(); y++){
-            if(index[x] > index[y]){
-                int temp = index[x];
-                index[x] = index[y];
-                index[y] = temp;
-            }
-        }
-    }
-    //loop through index and print out wait times
-    for(int x = 0; x < index.size(); x++){
-        cout << index[x] << " ";
-        if(friends[index[x]] == 0 || !lock[index[x]]) {
-            cout << "-1";
-        }else{
-            cout << friends[index[x]];
-        }
-        cout << endl;
-    }  
     return 0;
 }  
   
